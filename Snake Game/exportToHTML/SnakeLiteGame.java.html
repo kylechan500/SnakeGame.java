@@ -1,0 +1,320 @@
+<html>
+<head>
+<title>SnakeLiteGame.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cf8e6d;}
+.s1 { color: #bcbec4;}
+.s2 { color: #bcbec4;}
+.s3 { color: #2aacb8;}
+.s4 { color: #6aab73;}
+.s5 { color: #7a7e85;}
+</style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+SnakeLiteGame.java</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span><span class="s1">javax</span><span class="s2">.</span><span class="s1">swing</span><span class="s2">.*;</span>
+<span class="s0">import </span><span class="s1">java</span><span class="s2">.</span><span class="s1">awt</span><span class="s2">.*;</span>
+<span class="s0">import </span><span class="s1">java</span><span class="s2">.</span><span class="s1">awt</span><span class="s2">.</span><span class="s1">event</span><span class="s2">.</span><span class="s1">ActionEvent</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">java</span><span class="s2">.</span><span class="s1">awt</span><span class="s2">.</span><span class="s1">event</span><span class="s2">.</span><span class="s1">KeyEvent</span><span class="s2">;</span>
+<span class="s0">import </span><span class="s1">java</span><span class="s2">.</span><span class="s1">util</span><span class="s2">.</span><span class="s1">Random</span><span class="s2">;</span>
+
+<span class="s0">public class </span><span class="s1">SnakeLiteGame </span><span class="s0">extends </span><span class="s1">JFrame </span><span class="s2">{</span>
+
+    <span class="s0">private final int </span><span class="s1">WIDTH </span><span class="s2">= </span><span class="s3">600</span><span class="s2">, </span><span class="s1">HEIGHT </span><span class="s2">= </span><span class="s3">600</span><span class="s2">;</span>
+    <span class="s0">private final int </span><span class="s1">DOT_SIZE </span><span class="s2">= </span><span class="s3">20</span><span class="s2">;</span>
+    <span class="s0">private final int </span><span class="s1">ALL_DOTS </span><span class="s2">= </span><span class="s3">900</span><span class="s2">;</span>
+    <span class="s0">private final int </span><span class="s1">RAND_POS </span><span class="s2">= </span><span class="s3">29</span><span class="s2">;</span>
+    <span class="s0">private int</span><span class="s2">[] </span><span class="s1">x </span><span class="s2">= </span><span class="s0">new int</span><span class="s2">[</span><span class="s1">ALL_DOTS</span><span class="s2">];</span>
+    <span class="s0">private int</span><span class="s2">[] </span><span class="s1">y </span><span class="s2">= </span><span class="s0">new int</span><span class="s2">[</span><span class="s1">ALL_DOTS</span><span class="s2">];</span>
+    <span class="s0">private int </span><span class="s1">bodyParts</span><span class="s2">;</span>
+    <span class="s0">private int </span><span class="s1">foodX</span><span class="s2">;</span>
+    <span class="s0">private int </span><span class="s1">foodY</span><span class="s2">;</span>
+    <span class="s0">private int </span><span class="s1">fruitsEaten</span><span class="s2">;</span>
+    <span class="s0">private int </span><span class="s1">highScore</span><span class="s2">;</span>
+    <span class="s0">private char </span><span class="s1">direction</span><span class="s2">;</span>
+    <span class="s0">private boolean </span><span class="s1">running</span><span class="s2">;</span>
+    <span class="s0">private boolean </span><span class="s1">paused</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">Timer timer</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">JPanel gamePanel</span><span class="s2">;</span>
+    <span class="s0">private final int </span><span class="s1">DEFAULT_SPEED </span><span class="s2">= </span><span class="s3">120</span><span class="s2">;</span>
+    <span class="s0">private int </span><span class="s1">gameSpeed</span><span class="s2">;</span>
+    <span class="s0">private </span><span class="s1">Random random</span><span class="s2">;</span>
+
+    <span class="s0">public </span><span class="s1">SnakeLiteGame</span><span class="s2">() {</span>
+        <span class="s1">setTitle</span><span class="s2">(</span><span class="s4">&quot;Snake Lite&quot;</span><span class="s2">);</span>
+        <span class="s1">setResizable</span><span class="s2">(</span><span class="s0">false</span><span class="s2">);</span>
+        <span class="s1">setDefaultCloseOperation</span><span class="s2">(</span><span class="s1">JFrame</span><span class="s2">.</span><span class="s1">EXIT_ON_CLOSE</span><span class="s2">);</span>
+
+        <span class="s1">gamePanel </span><span class="s2">= </span><span class="s0">new </span><span class="s1">JPanel</span><span class="s2">() {</span>
+            <span class="s1">@Override</span>
+            <span class="s0">protected void </span><span class="s1">paintComponent</span><span class="s2">(</span><span class="s1">Graphics g</span><span class="s2">) {</span>
+                <span class="s0">super</span><span class="s2">.</span><span class="s1">paintComponent</span><span class="s2">(</span><span class="s1">g</span><span class="s2">);</span>
+                <span class="s1">draw</span><span class="s2">(</span><span class="s1">g</span><span class="s2">);</span>
+            <span class="s2">}</span>
+        <span class="s2">};</span>
+        <span class="s1">gamePanel</span><span class="s2">.</span><span class="s1">setPreferredSize</span><span class="s2">(</span><span class="s0">new </span><span class="s1">Dimension</span><span class="s2">(</span><span class="s1">WIDTH</span><span class="s2">, </span><span class="s1">HEIGHT</span><span class="s2">));</span>
+        <span class="s1">gamePanel</span><span class="s2">.</span><span class="s1">setFocusable</span><span class="s2">(</span><span class="s0">true</span><span class="s2">);</span>
+        <span class="s1">gamePanel</span><span class="s2">.</span><span class="s1">requestFocusInWindow</span><span class="s2">();</span>
+        <span class="s1">gamePanel</span><span class="s2">.</span><span class="s1">setBackground</span><span class="s2">(</span><span class="s1">Color</span><span class="s2">.</span><span class="s1">BLACK</span><span class="s2">);</span>
+
+        <span class="s1">add</span><span class="s2">(</span><span class="s1">gamePanel</span><span class="s2">);</span>
+        <span class="s1">pack</span><span class="s2">();</span>
+        <span class="s1">setLocationRelativeTo</span><span class="s2">(</span><span class="s0">null</span><span class="s2">);</span>
+
+        <span class="s1">random </span><span class="s2">= </span><span class="s0">new </span><span class="s1">Random</span><span class="s2">();</span>
+        <span class="s1">showInstructions</span><span class="s2">();</span>
+    <span class="s2">}</span>
+
+    <span class="s0">private void </span><span class="s1">showInstructions</span><span class="s2">() {</span>
+        <span class="s1">JOptionPane</span><span class="s2">.</span><span class="s1">showMessageDialog</span><span class="s2">(</span><span class="s0">this</span><span class="s2">,</span>
+                <span class="s4">&quot;Welcome to Snake Lite!</span><span class="s0">\n</span><span class="s4">&quot; </span><span class="s2">+</span>
+                        <span class="s4">&quot;Use the arrow keys to move the snake.</span><span class="s0">\n</span><span class="s4">&quot; </span><span class="s2">+</span>
+                        <span class="s4">&quot;Press 'P' to pause/resume the game.</span><span class="s0">\n</span><span class="s4">&quot; </span><span class="s2">+</span>
+                        <span class="s4">&quot;Press 'R' to restart the game.</span><span class="s0">\n</span><span class="s4">&quot; </span><span class="s2">+</span>
+                        <span class="s4">&quot;Avoid the walls and your own tail!</span><span class="s0">\n</span><span class="s4">&quot; </span><span class="s2">+</span>
+                        <span class="s4">&quot;Press 'W' to increase speed.</span><span class="s0">\n</span><span class="s4">&quot; </span><span class="s2">+</span>
+                        <span class="s4">&quot;Press 'S' to decrease speed.&quot;</span><span class="s2">,</span>
+                <span class="s4">&quot;Game Instructions&quot;</span><span class="s2">,</span>
+                <span class="s1">JOptionPane</span><span class="s2">.</span><span class="s1">INFORMATION_MESSAGE</span><span class="s2">);</span>
+        <span class="s1">initGame</span><span class="s2">();</span>
+        <span class="s1">initKeyBindings</span><span class="s2">();</span>
+        <span class="s1">setVisible</span><span class="s2">(</span><span class="s0">true</span><span class="s2">);</span>
+    <span class="s2">}</span>
+
+    <span class="s0">private void </span><span class="s1">initGame</span><span class="s2">() {</span>
+        <span class="s1">bodyParts </span><span class="s2">= </span><span class="s3">3</span><span class="s2">;</span>
+        <span class="s1">fruitsEaten </span><span class="s2">= </span><span class="s3">0</span><span class="s2">;</span>
+        <span class="s1">direction </span><span class="s2">= </span><span class="s4">'R'</span><span class="s2">;</span>
+        <span class="s1">running </span><span class="s2">= </span><span class="s0">true</span><span class="s2">;</span>
+        <span class="s1">paused </span><span class="s2">= </span><span class="s0">false</span><span class="s2">;</span>
+        <span class="s1">gameSpeed </span><span class="s2">= </span><span class="s1">DEFAULT_SPEED</span><span class="s2">;</span>
+
+        <span class="s5">// Initialize the snake's body parts</span>
+        <span class="s1">x</span><span class="s2">[</span><span class="s3">0</span><span class="s2">] = </span><span class="s3">50</span><span class="s2">;</span>
+        <span class="s1">y</span><span class="s2">[</span><span class="s3">0</span><span class="s2">] = </span><span class="s3">50</span><span class="s2">;</span>
+        <span class="s0">for </span><span class="s2">(</span><span class="s0">int </span><span class="s1">i </span><span class="s2">= </span><span class="s3">1</span><span class="s2">; </span><span class="s1">i </span><span class="s2">&lt; </span><span class="s1">bodyParts</span><span class="s2">; </span><span class="s1">i</span><span class="s2">++) {</span>
+            <span class="s1">x</span><span class="s2">[</span><span class="s1">i</span><span class="s2">] = </span><span class="s1">x</span><span class="s2">[</span><span class="s3">0</span><span class="s2">] - (</span><span class="s1">i </span><span class="s2">* </span><span class="s1">DOT_SIZE</span><span class="s2">);</span>
+            <span class="s1">y</span><span class="s2">[</span><span class="s1">i</span><span class="s2">] = </span><span class="s1">y</span><span class="s2">[</span><span class="s3">0</span><span class="s2">];</span>
+        <span class="s2">}</span>
+        <span class="s1">placeFood</span><span class="s2">();</span>
+
+        <span class="s1">timer </span><span class="s2">= </span><span class="s0">new </span><span class="s1">Timer</span><span class="s2">(</span><span class="s1">gameSpeed</span><span class="s2">, </span><span class="s1">e -&gt; updateGame</span><span class="s2">());</span>
+        <span class="s1">timer</span><span class="s2">.</span><span class="s1">setDelay</span><span class="s2">(</span><span class="s1">gameSpeed</span><span class="s2">);</span>
+        <span class="s1">timer</span><span class="s2">.</span><span class="s1">start</span><span class="s2">();</span>
+    <span class="s2">}</span>
+    <span class="s0">private void </span><span class="s1">initKeyBindings</span><span class="s2">() {</span>
+        <span class="s1">gamePanel</span><span class="s2">.</span><span class="s1">getInputMap</span><span class="s2">(</span><span class="s1">JComponent</span><span class="s2">.</span><span class="s1">WHEN_IN_FOCUSED_WINDOW</span><span class="s2">).</span><span class="s1">put</span><span class="s2">(</span><span class="s1">KeyStroke</span><span class="s2">.</span><span class="s1">getKeyStroke</span><span class="s2">(</span><span class="s1">KeyEvent</span><span class="s2">.</span><span class="s1">VK_LEFT</span><span class="s2">, </span><span class="s3">0</span><span class="s2">), </span><span class="s4">&quot;moveLeft&quot;</span><span class="s2">);</span>
+        <span class="s1">gamePanel</span><span class="s2">.</span><span class="s1">getActionMap</span><span class="s2">().</span><span class="s1">put</span><span class="s2">(</span><span class="s4">&quot;moveLeft&quot;</span><span class="s2">, </span><span class="s0">new </span><span class="s1">AbstractAction</span><span class="s2">() {</span>
+            <span class="s1">@Override</span>
+            <span class="s0">public void </span><span class="s1">actionPerformed</span><span class="s2">(</span><span class="s1">ActionEvent e</span><span class="s2">) {</span>
+                <span class="s0">if </span><span class="s2">(</span><span class="s1">direction </span><span class="s2">!= </span><span class="s4">'R'</span><span class="s2">) </span><span class="s1">direction </span><span class="s2">= </span><span class="s4">'L'</span><span class="s2">;</span>
+            <span class="s2">}</span>
+        <span class="s2">});</span>
+
+        <span class="s1">gamePanel</span><span class="s2">.</span><span class="s1">getInputMap</span><span class="s2">(</span><span class="s1">JComponent</span><span class="s2">.</span><span class="s1">WHEN_IN_FOCUSED_WINDOW</span><span class="s2">).</span><span class="s1">put</span><span class="s2">(</span><span class="s1">KeyStroke</span><span class="s2">.</span><span class="s1">getKeyStroke</span><span class="s2">(</span><span class="s1">KeyEvent</span><span class="s2">.</span><span class="s1">VK_RIGHT</span><span class="s2">, </span><span class="s3">0</span><span class="s2">), </span><span class="s4">&quot;moveRight&quot;</span><span class="s2">);</span>
+        <span class="s1">gamePanel</span><span class="s2">.</span><span class="s1">getActionMap</span><span class="s2">().</span><span class="s1">put</span><span class="s2">(</span><span class="s4">&quot;moveRight&quot;</span><span class="s2">, </span><span class="s0">new </span><span class="s1">AbstractAction</span><span class="s2">() {</span>
+            <span class="s1">@Override</span>
+            <span class="s0">public void </span><span class="s1">actionPerformed</span><span class="s2">(</span><span class="s1">ActionEvent e</span><span class="s2">) {</span>
+                <span class="s0">if </span><span class="s2">(</span><span class="s1">direction </span><span class="s2">!= </span><span class="s4">'L'</span><span class="s2">) </span><span class="s1">direction </span><span class="s2">= </span><span class="s4">'R'</span><span class="s2">;</span>
+            <span class="s2">}</span>
+        <span class="s2">});</span>
+
+        <span class="s1">gamePanel</span><span class="s2">.</span><span class="s1">getInputMap</span><span class="s2">(</span><span class="s1">JComponent</span><span class="s2">.</span><span class="s1">WHEN_IN_FOCUSED_WINDOW</span><span class="s2">).</span><span class="s1">put</span><span class="s2">(</span><span class="s1">KeyStroke</span><span class="s2">.</span><span class="s1">getKeyStroke</span><span class="s2">(</span><span class="s1">KeyEvent</span><span class="s2">.</span><span class="s1">VK_UP</span><span class="s2">, </span><span class="s3">0</span><span class="s2">), </span><span class="s4">&quot;moveUp&quot;</span><span class="s2">);</span>
+        <span class="s1">gamePanel</span><span class="s2">.</span><span class="s1">getActionMap</span><span class="s2">().</span><span class="s1">put</span><span class="s2">(</span><span class="s4">&quot;moveUp&quot;</span><span class="s2">, </span><span class="s0">new </span><span class="s1">AbstractAction</span><span class="s2">() {</span>
+            <span class="s1">@Override</span>
+            <span class="s0">public void </span><span class="s1">actionPerformed</span><span class="s2">(</span><span class="s1">ActionEvent e</span><span class="s2">) {</span>
+                <span class="s0">if </span><span class="s2">(</span><span class="s1">direction </span><span class="s2">!= </span><span class="s4">'D'</span><span class="s2">) </span><span class="s1">direction </span><span class="s2">= </span><span class="s4">'U'</span><span class="s2">;</span>
+            <span class="s2">}</span>
+        <span class="s2">});</span>
+
+        <span class="s1">gamePanel</span><span class="s2">.</span><span class="s1">getInputMap</span><span class="s2">(</span><span class="s1">JComponent</span><span class="s2">.</span><span class="s1">WHEN_IN_FOCUSED_WINDOW</span><span class="s2">).</span><span class="s1">put</span><span class="s2">(</span><span class="s1">KeyStroke</span><span class="s2">.</span><span class="s1">getKeyStroke</span><span class="s2">(</span><span class="s1">KeyEvent</span><span class="s2">.</span><span class="s1">VK_DOWN</span><span class="s2">, </span><span class="s3">0</span><span class="s2">), </span><span class="s4">&quot;moveDown&quot;</span><span class="s2">);</span>
+        <span class="s1">gamePanel</span><span class="s2">.</span><span class="s1">getActionMap</span><span class="s2">().</span><span class="s1">put</span><span class="s2">(</span><span class="s4">&quot;moveDown&quot;</span><span class="s2">, </span><span class="s0">new </span><span class="s1">AbstractAction</span><span class="s2">() {</span>
+            <span class="s1">@Override</span>
+            <span class="s0">public void </span><span class="s1">actionPerformed</span><span class="s2">(</span><span class="s1">ActionEvent e</span><span class="s2">) {</span>
+                <span class="s0">if </span><span class="s2">(</span><span class="s1">direction </span><span class="s2">!= </span><span class="s4">'U'</span><span class="s2">) </span><span class="s1">direction </span><span class="s2">= </span><span class="s4">'D'</span><span class="s2">;</span>
+            <span class="s2">}</span>
+        <span class="s2">});</span>
+
+        <span class="s1">gamePanel</span><span class="s2">.</span><span class="s1">getInputMap</span><span class="s2">(</span><span class="s1">JComponent</span><span class="s2">.</span><span class="s1">WHEN_IN_FOCUSED_WINDOW</span><span class="s2">).</span><span class="s1">put</span><span class="s2">(</span><span class="s1">KeyStroke</span><span class="s2">.</span><span class="s1">getKeyStroke</span><span class="s2">(</span><span class="s1">KeyEvent</span><span class="s2">.</span><span class="s1">VK_P</span><span class="s2">, </span><span class="s3">0</span><span class="s2">), </span><span class="s4">&quot;pauseGame&quot;</span><span class="s2">);</span>
+        <span class="s1">gamePanel</span><span class="s2">.</span><span class="s1">getActionMap</span><span class="s2">().</span><span class="s1">put</span><span class="s2">(</span><span class="s4">&quot;pauseGame&quot;</span><span class="s2">, </span><span class="s0">new </span><span class="s1">AbstractAction</span><span class="s2">() {</span>
+            <span class="s1">@Override</span>
+            <span class="s0">public void </span><span class="s1">actionPerformed</span><span class="s2">(</span><span class="s1">ActionEvent e</span><span class="s2">) {</span>
+                <span class="s1">pauseGame</span><span class="s2">();</span>
+            <span class="s2">}</span>
+        <span class="s2">});</span>
+
+        <span class="s1">gamePanel</span><span class="s2">.</span><span class="s1">getInputMap</span><span class="s2">(</span><span class="s1">JComponent</span><span class="s2">.</span><span class="s1">WHEN_IN_FOCUSED_WINDOW</span><span class="s2">).</span><span class="s1">put</span><span class="s2">(</span><span class="s1">KeyStroke</span><span class="s2">.</span><span class="s1">getKeyStroke</span><span class="s2">(</span><span class="s1">KeyEvent</span><span class="s2">.</span><span class="s1">VK_R</span><span class="s2">, </span><span class="s3">0</span><span class="s2">), </span><span class="s4">&quot;restartGame&quot;</span><span class="s2">);</span>
+        <span class="s1">gamePanel</span><span class="s2">.</span><span class="s1">getActionMap</span><span class="s2">().</span><span class="s1">put</span><span class="s2">(</span><span class="s4">&quot;restartGame&quot;</span><span class="s2">, </span><span class="s0">new </span><span class="s1">AbstractAction</span><span class="s2">() {</span>
+            <span class="s1">@Override</span>
+            <span class="s0">public void </span><span class="s1">actionPerformed</span><span class="s2">(</span><span class="s1">ActionEvent e</span><span class="s2">) {</span>
+                <span class="s1">restartGame</span><span class="s2">();</span>
+            <span class="s2">}</span>
+        <span class="s2">});</span>
+
+        <span class="s1">gamePanel</span><span class="s2">.</span><span class="s1">getInputMap</span><span class="s2">(</span><span class="s1">JComponent</span><span class="s2">.</span><span class="s1">WHEN_IN_FOCUSED_WINDOW</span><span class="s2">).</span><span class="s1">put</span><span class="s2">(</span><span class="s1">KeyStroke</span><span class="s2">.</span><span class="s1">getKeyStroke</span><span class="s2">(</span><span class="s1">KeyEvent</span><span class="s2">.</span><span class="s1">VK_W</span><span class="s2">, </span><span class="s3">0</span><span class="s2">), </span><span class="s4">&quot;increaseSpeed&quot;</span><span class="s2">);</span>
+        <span class="s1">gamePanel</span><span class="s2">.</span><span class="s1">getActionMap</span><span class="s2">().</span><span class="s1">put</span><span class="s2">(</span><span class="s4">&quot;increaseSpeed&quot;</span><span class="s2">, </span><span class="s0">new </span><span class="s1">AbstractAction</span><span class="s2">() {</span>
+            <span class="s1">@Override</span>
+            <span class="s0">public void </span><span class="s1">actionPerformed</span><span class="s2">(</span><span class="s1">ActionEvent e</span><span class="s2">) {</span>
+                <span class="s1">increaseSpeed</span><span class="s2">();</span>
+            <span class="s2">}</span>
+        <span class="s2">});</span>
+
+        <span class="s1">gamePanel</span><span class="s2">.</span><span class="s1">getInputMap</span><span class="s2">(</span><span class="s1">JComponent</span><span class="s2">.</span><span class="s1">WHEN_IN_FOCUSED_WINDOW</span><span class="s2">).</span><span class="s1">put</span><span class="s2">(</span><span class="s1">KeyStroke</span><span class="s2">.</span><span class="s1">getKeyStroke</span><span class="s2">(</span><span class="s1">KeyEvent</span><span class="s2">.</span><span class="s1">VK_S</span><span class="s2">, </span><span class="s3">0</span><span class="s2">), </span><span class="s4">&quot;decreaseSpeed&quot;</span><span class="s2">);</span>
+        <span class="s1">gamePanel</span><span class="s2">.</span><span class="s1">getActionMap</span><span class="s2">().</span><span class="s1">put</span><span class="s2">(</span><span class="s4">&quot;decreaseSpeed&quot;</span><span class="s2">, </span><span class="s0">new </span><span class="s1">AbstractAction</span><span class="s2">() {</span>
+            <span class="s1">@Override</span>
+            <span class="s0">public void </span><span class="s1">actionPerformed</span><span class="s2">(</span><span class="s1">ActionEvent e</span><span class="s2">) {</span>
+                <span class="s1">decreaseSpeed</span><span class="s2">();</span>
+            <span class="s2">}</span>
+        <span class="s2">});</span>
+    <span class="s2">}</span>
+
+    <span class="s0">private void </span><span class="s1">draw</span><span class="s2">(</span><span class="s1">Graphics g</span><span class="s2">) {</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s1">running</span><span class="s2">) {</span>
+            <span class="s1">g</span><span class="s2">.</span><span class="s1">setColor</span><span class="s2">(</span><span class="s1">Color</span><span class="s2">.</span><span class="s1">GREEN</span><span class="s2">);</span>
+            <span class="s0">for </span><span class="s2">(</span><span class="s0">int </span><span class="s1">i </span><span class="s2">= </span><span class="s3">0</span><span class="s2">; </span><span class="s1">i </span><span class="s2">&lt; </span><span class="s1">bodyParts</span><span class="s2">; </span><span class="s1">i</span><span class="s2">++) {</span>
+                <span class="s1">g</span><span class="s2">.</span><span class="s1">fillRect</span><span class="s2">(</span><span class="s1">x</span><span class="s2">[</span><span class="s1">i</span><span class="s2">], </span><span class="s1">y</span><span class="s2">[</span><span class="s1">i</span><span class="s2">], </span><span class="s1">DOT_SIZE</span><span class="s2">, </span><span class="s1">DOT_SIZE</span><span class="s2">);</span>
+            <span class="s2">}</span>
+
+            <span class="s1">g</span><span class="s2">.</span><span class="s1">setColor</span><span class="s2">(</span><span class="s1">Color</span><span class="s2">.</span><span class="s1">RED</span><span class="s2">);</span>
+            <span class="s1">g</span><span class="s2">.</span><span class="s1">fillRect</span><span class="s2">(</span><span class="s1">foodX</span><span class="s2">, </span><span class="s1">foodY</span><span class="s2">, </span><span class="s1">DOT_SIZE</span><span class="s2">, </span><span class="s1">DOT_SIZE</span><span class="s2">);</span>
+
+            <span class="s1">g</span><span class="s2">.</span><span class="s1">setColor</span><span class="s2">(</span><span class="s1">Color</span><span class="s2">.</span><span class="s1">WHITE</span><span class="s2">);</span>
+            <span class="s1">g</span><span class="s2">.</span><span class="s1">drawString</span><span class="s2">(</span><span class="s4">&quot;Score: &quot; </span><span class="s2">+ </span><span class="s1">fruitsEaten</span><span class="s2">, </span><span class="s3">10</span><span class="s2">, </span><span class="s3">20</span><span class="s2">);</span>
+            <span class="s1">g</span><span class="s2">.</span><span class="s1">drawString</span><span class="s2">(</span><span class="s4">&quot;High Score: &quot; </span><span class="s2">+ </span><span class="s1">highScore</span><span class="s2">, </span><span class="s3">10</span><span class="s2">, </span><span class="s3">40</span><span class="s2">);</span>
+        <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+            <span class="s1">gameOver</span><span class="s2">(</span><span class="s1">g</span><span class="s2">);</span>
+        <span class="s2">}</span>
+    <span class="s2">}</span>
+
+    <span class="s0">private void </span><span class="s1">gameOver</span><span class="s2">(</span><span class="s1">Graphics g</span><span class="s2">) {</span>
+        <span class="s1">String msg </span><span class="s2">= </span><span class="s4">&quot;Game Over&quot;</span><span class="s2">;</span>
+        <span class="s1">Font small </span><span class="s2">= </span><span class="s0">new </span><span class="s1">Font</span><span class="s2">(</span><span class="s4">&quot;Helvetica&quot;</span><span class="s2">, </span><span class="s1">Font</span><span class="s2">.</span><span class="s1">BOLD</span><span class="s2">, </span><span class="s3">14</span><span class="s2">);</span>
+        <span class="s1">FontMetrics metr </span><span class="s2">= </span><span class="s1">getFontMetrics</span><span class="s2">(</span><span class="s1">small</span><span class="s2">);</span>
+
+        <span class="s1">g</span><span class="s2">.</span><span class="s1">setColor</span><span class="s2">(</span><span class="s1">Color</span><span class="s2">.</span><span class="s1">WHITE</span><span class="s2">);</span>
+        <span class="s1">g</span><span class="s2">.</span><span class="s1">setFont</span><span class="s2">(</span><span class="s1">small</span><span class="s2">);</span>
+        <span class="s1">g</span><span class="s2">.</span><span class="s1">drawString</span><span class="s2">(</span><span class="s1">msg</span><span class="s2">, (</span><span class="s1">WIDTH </span><span class="s2">- </span><span class="s1">metr</span><span class="s2">.</span><span class="s1">stringWidth</span><span class="s2">(</span><span class="s1">msg</span><span class="s2">)) / </span><span class="s3">2</span><span class="s2">, </span><span class="s1">HEIGHT </span><span class="s2">/ </span><span class="s3">2 </span><span class="s2">- </span><span class="s3">20</span><span class="s2">);</span>
+
+        <span class="s1">g</span><span class="s2">.</span><span class="s1">drawString</span><span class="s2">(</span><span class="s4">&quot;Score: &quot; </span><span class="s2">+ </span><span class="s1">fruitsEaten</span><span class="s2">, (</span><span class="s1">WIDTH </span><span class="s2">- </span><span class="s1">metr</span><span class="s2">.</span><span class="s1">stringWidth</span><span class="s2">(</span><span class="s4">&quot;Score: &quot; </span><span class="s2">+ </span><span class="s1">fruitsEaten</span><span class="s2">)) / </span><span class="s3">2</span><span class="s2">, </span><span class="s1">HEIGHT </span><span class="s2">/ </span><span class="s3">2</span><span class="s2">);</span>
+        <span class="s1">g</span><span class="s2">.</span><span class="s1">drawString</span><span class="s2">(</span><span class="s4">&quot;High Score: &quot; </span><span class="s2">+ </span><span class="s1">highScore</span><span class="s2">, (</span><span class="s1">WIDTH </span><span class="s2">- </span><span class="s1">metr</span><span class="s2">.</span><span class="s1">stringWidth</span><span class="s2">(</span><span class="s4">&quot;High Score: &quot; </span><span class="s2">+ </span><span class="s1">highScore</span><span class="s2">)) / </span><span class="s3">2</span><span class="s2">, </span><span class="s1">HEIGHT </span><span class="s2">/ </span><span class="s3">2 </span><span class="s2">+ </span><span class="s3">20</span><span class="s2">);</span>
+    <span class="s2">}</span>
+
+
+    <span class="s0">private void </span><span class="s1">updateGame</span><span class="s2">() {</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s1">running </span><span class="s2">&amp;&amp; !</span><span class="s1">paused</span><span class="s2">) {</span>
+            <span class="s1">moveSnake</span><span class="s2">();</span>
+            <span class="s1">checkFoodCollision</span><span class="s2">();</span>
+            <span class="s1">checkCollision</span><span class="s2">();</span>
+        <span class="s2">}</span>
+        <span class="s1">gamePanel</span><span class="s2">.</span><span class="s1">repaint</span><span class="s2">();</span>
+    <span class="s2">}</span>
+
+    <span class="s0">private void </span><span class="s1">moveSnake</span><span class="s2">() {</span>
+        <span class="s0">for </span><span class="s2">(</span><span class="s0">int </span><span class="s1">i </span><span class="s2">= </span><span class="s1">bodyParts</span><span class="s2">; </span><span class="s1">i </span><span class="s2">&gt; </span><span class="s3">0</span><span class="s2">; </span><span class="s1">i</span><span class="s2">--) {</span>
+            <span class="s1">x</span><span class="s2">[</span><span class="s1">i</span><span class="s2">] = </span><span class="s1">x</span><span class="s2">[</span><span class="s1">i </span><span class="s2">- </span><span class="s3">1</span><span class="s2">];</span>
+            <span class="s1">y</span><span class="s2">[</span><span class="s1">i</span><span class="s2">] = </span><span class="s1">y</span><span class="s2">[</span><span class="s1">i </span><span class="s2">- </span><span class="s3">1</span><span class="s2">];</span>
+        <span class="s2">}</span>
+
+        <span class="s0">switch </span><span class="s2">(</span><span class="s1">direction</span><span class="s2">) {</span>
+            <span class="s0">case </span><span class="s4">'U'</span><span class="s2">:</span>
+                <span class="s1">y</span><span class="s2">[</span><span class="s3">0</span><span class="s2">] -= </span><span class="s1">DOT_SIZE</span><span class="s2">;</span>
+                <span class="s0">break</span><span class="s2">;</span>
+            <span class="s0">case </span><span class="s4">'D'</span><span class="s2">:</span>
+                <span class="s1">y</span><span class="s2">[</span><span class="s3">0</span><span class="s2">] += </span><span class="s1">DOT_SIZE</span><span class="s2">;</span>
+                <span class="s0">break</span><span class="s2">;</span>
+            <span class="s0">case </span><span class="s4">'L'</span><span class="s2">:</span>
+                <span class="s1">x</span><span class="s2">[</span><span class="s3">0</span><span class="s2">] -= </span><span class="s1">DOT_SIZE</span><span class="s2">;</span>
+                <span class="s0">break</span><span class="s2">;</span>
+            <span class="s0">case </span><span class="s4">'R'</span><span class="s2">:</span>
+                <span class="s1">x</span><span class="s2">[</span><span class="s3">0</span><span class="s2">] += </span><span class="s1">DOT_SIZE</span><span class="s2">;</span>
+                <span class="s0">break</span><span class="s2">;</span>
+        <span class="s2">}</span>
+    <span class="s2">}</span>
+
+    <span class="s0">private void </span><span class="s1">checkCollision</span><span class="s2">() {</span>
+        <span class="s5">// Check for wall collision</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s1">x</span><span class="s2">[</span><span class="s3">0</span><span class="s2">] &lt; </span><span class="s3">0 </span><span class="s2">|| </span><span class="s1">x</span><span class="s2">[</span><span class="s3">0</span><span class="s2">] &gt;= </span><span class="s1">WIDTH </span><span class="s2">|| </span><span class="s1">y</span><span class="s2">[</span><span class="s3">0</span><span class="s2">] &lt; </span><span class="s3">0 </span><span class="s2">|| </span><span class="s1">y</span><span class="s2">[</span><span class="s3">0</span><span class="s2">] &gt;= </span><span class="s1">HEIGHT</span><span class="s2">) {</span>
+            <span class="s1">running </span><span class="s2">= </span><span class="s0">false</span><span class="s2">;</span>
+        <span class="s2">}</span>
+
+        <span class="s5">// Check for self-collision</span>
+        <span class="s0">for </span><span class="s2">(</span><span class="s0">int </span><span class="s1">i </span><span class="s2">= </span><span class="s1">bodyParts</span><span class="s2">; </span><span class="s1">i </span><span class="s2">&gt; </span><span class="s3">0</span><span class="s2">; </span><span class="s1">i</span><span class="s2">--) {</span>
+            <span class="s0">if </span><span class="s2">((</span><span class="s1">i </span><span class="s2">&gt; </span><span class="s3">4</span><span class="s2">) &amp;&amp; (</span><span class="s1">x</span><span class="s2">[</span><span class="s3">0</span><span class="s2">] == </span><span class="s1">x</span><span class="s2">[</span><span class="s1">i</span><span class="s2">]) &amp;&amp; (</span><span class="s1">y</span><span class="s2">[</span><span class="s3">0</span><span class="s2">] == </span><span class="s1">y</span><span class="s2">[</span><span class="s1">i</span><span class="s2">])) {</span>
+                <span class="s1">running </span><span class="s2">= </span><span class="s0">false</span><span class="s2">;</span>
+                <span class="s0">break</span><span class="s2">;</span>
+            <span class="s2">}</span>
+        <span class="s2">}</span>
+
+        <span class="s0">if </span><span class="s2">(!</span><span class="s1">running</span><span class="s2">) {</span>
+            <span class="s1">timer</span><span class="s2">.</span><span class="s1">stop</span><span class="s2">();</span>
+        <span class="s2">}</span>
+    <span class="s2">}</span>
+
+    <span class="s0">private void </span><span class="s1">placeFood</span><span class="s2">() {</span>
+        <span class="s0">int </span><span class="s1">r </span><span class="s2">= </span><span class="s1">random</span><span class="s2">.</span><span class="s1">nextInt</span><span class="s2">(</span><span class="s1">RAND_POS</span><span class="s2">);</span>
+        <span class="s1">foodX </span><span class="s2">= ((</span><span class="s1">r </span><span class="s2">* </span><span class="s1">DOT_SIZE</span><span class="s2">) + </span><span class="s1">DOT_SIZE </span><span class="s2">/ </span><span class="s3">2</span><span class="s2">);</span>
+        <span class="s1">r </span><span class="s2">= </span><span class="s1">random</span><span class="s2">.</span><span class="s1">nextInt</span><span class="s2">(</span><span class="s1">RAND_POS</span><span class="s2">);</span>
+        <span class="s1">foodY </span><span class="s2">= ((</span><span class="s1">r </span><span class="s2">* </span><span class="s1">DOT_SIZE</span><span class="s2">) + </span><span class="s1">DOT_SIZE </span><span class="s2">/ </span><span class="s3">2</span><span class="s2">);</span>
+    <span class="s2">}</span>
+
+    <span class="s0">private void </span><span class="s1">checkFoodCollision</span><span class="s2">() {</span>
+        <span class="s0">if </span><span class="s2">((</span><span class="s1">x</span><span class="s2">[</span><span class="s3">0</span><span class="s2">] &gt;= </span><span class="s1">foodX </span><span class="s2">- </span><span class="s1">DOT_SIZE </span><span class="s2">/ </span><span class="s3">2</span><span class="s2">) &amp;&amp; (</span><span class="s1">x</span><span class="s2">[</span><span class="s3">0</span><span class="s2">] &lt;= </span><span class="s1">foodX </span><span class="s2">+ </span><span class="s1">DOT_SIZE </span><span class="s2">/ </span><span class="s3">2</span><span class="s2">) &amp;&amp;</span>
+                <span class="s2">(</span><span class="s1">y</span><span class="s2">[</span><span class="s3">0</span><span class="s2">] &gt;= </span><span class="s1">foodY </span><span class="s2">- </span><span class="s1">DOT_SIZE </span><span class="s2">/ </span><span class="s3">2</span><span class="s2">) &amp;&amp; (</span><span class="s1">y</span><span class="s2">[</span><span class="s3">0</span><span class="s2">] &lt;= </span><span class="s1">foodY </span><span class="s2">+ </span><span class="s1">DOT_SIZE </span><span class="s2">/ </span><span class="s3">2</span><span class="s2">)) {</span>
+            <span class="s1">bodyParts</span><span class="s2">++;</span>
+            <span class="s1">placeFood</span><span class="s2">();</span>
+            <span class="s1">fruitsEaten</span><span class="s2">++;</span>
+            <span class="s0">if </span><span class="s2">(</span><span class="s1">fruitsEaten </span><span class="s2">&gt; </span><span class="s1">highScore</span><span class="s2">) {</span>
+                <span class="s1">highScore </span><span class="s2">= </span><span class="s1">fruitsEaten</span><span class="s2">;</span>
+            <span class="s2">}</span>
+        <span class="s2">}</span>
+    <span class="s2">}</span>
+
+
+    <span class="s0">private void </span><span class="s1">pauseGame</span><span class="s2">() {</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s1">running</span><span class="s2">) {</span>
+            <span class="s0">if </span><span class="s2">(</span><span class="s1">paused</span><span class="s2">) {</span>
+                <span class="s1">paused </span><span class="s2">= </span><span class="s0">false</span><span class="s2">;</span>
+                <span class="s1">timer</span><span class="s2">.</span><span class="s1">start</span><span class="s2">();</span>
+            <span class="s2">} </span><span class="s0">else </span><span class="s2">{</span>
+                <span class="s1">paused </span><span class="s2">= </span><span class="s0">true</span><span class="s2">;</span>
+                <span class="s1">timer</span><span class="s2">.</span><span class="s1">stop</span><span class="s2">();</span>
+            <span class="s2">}</span>
+        <span class="s2">}</span>
+    <span class="s2">}</span>
+
+    <span class="s0">private void </span><span class="s1">restartGame</span><span class="s2">() {</span>
+        <span class="s1">initGame</span><span class="s2">();</span>
+    <span class="s2">}</span>
+
+    <span class="s0">private void </span><span class="s1">increaseSpeed</span><span class="s2">() {</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s1">gameSpeed </span><span class="s2">&gt; </span><span class="s3">20</span><span class="s2">) {</span>
+            <span class="s1">gameSpeed </span><span class="s2">-= </span><span class="s3">20</span><span class="s2">;</span>
+            <span class="s1">timer</span><span class="s2">.</span><span class="s1">setDelay</span><span class="s2">(</span><span class="s1">gameSpeed</span><span class="s2">);</span>
+        <span class="s2">}</span>
+    <span class="s2">}</span>
+
+    <span class="s0">private void </span><span class="s1">decreaseSpeed</span><span class="s2">() {</span>
+        <span class="s0">if </span><span class="s2">(</span><span class="s1">gameSpeed </span><span class="s2">&lt; </span><span class="s3">200</span><span class="s2">) {</span>
+            <span class="s1">gameSpeed </span><span class="s2">+= </span><span class="s3">20</span><span class="s2">;</span>
+            <span class="s1">timer</span><span class="s2">.</span><span class="s1">setDelay</span><span class="s2">(</span><span class="s1">gameSpeed</span><span class="s2">);</span>
+        <span class="s2">}</span>
+    <span class="s2">}</span>
+
+    <span class="s0">public static void </span><span class="s1">main</span><span class="s2">(</span><span class="s1">String</span><span class="s2">[] </span><span class="s1">args</span><span class="s2">) {</span>
+        <span class="s1">SwingUtilities</span><span class="s2">.</span><span class="s1">invokeLater</span><span class="s2">(</span><span class="s0">new </span><span class="s1">Runnable</span><span class="s2">() {</span>
+            <span class="s1">@Override</span>
+            <span class="s0">public void </span><span class="s1">run</span><span class="s2">() {</span>
+                <span class="s1">SnakeLiteGame game </span><span class="s2">= </span><span class="s0">new </span><span class="s1">SnakeLiteGame</span><span class="s2">();</span>
+                <span class="s1">game</span><span class="s2">.</span><span class="s1">setVisible</span><span class="s2">(</span><span class="s0">true</span><span class="s2">);</span>
+            <span class="s2">}</span>
+        <span class="s2">});</span>
+    <span class="s2">}</span>
+<span class="s2">}</span>
+</pre>
+</body>
+</html>
